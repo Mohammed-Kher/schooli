@@ -30,7 +30,7 @@ return new class extends Migration {
         if (!Schema::hasTable('subjects')) {
             Schema::create('subjects', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('department_id')->constrained('departments');
+                $table->foreignId('classroom_id')->constrained('classrooms');
                 $table->string('name');
                 $table->timestamps();
             });
@@ -42,6 +42,28 @@ return new class extends Migration {
                 $table->foreignId('subject_id')->constrained('subjects');
                 $table->string('name');
                 $table->string('description');
+                $table->string('due_date');
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('attendances')) {
+            Schema::create('attendances', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+                $table->date('date');
+                $table->enum('status', ['present', 'absent', 'late']);
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('notes')) {
+            Schema::create('notes', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+                $table->string('teacher_name');
+                $table->string('title');
+                $table->text('content');
                 $table->timestamps();
             });
         }

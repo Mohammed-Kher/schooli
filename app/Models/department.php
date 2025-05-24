@@ -3,16 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class department extends Model
 {
     protected $fillable = [
+        'classroom_id',
         'name',
     ];
 
-    public function classrooms(): HasMany
+    public function classroom(): BelongsTo
     {
-        return $this->hasMany(classroom::class);
+        return $this->belongsTo(classroom::class);
     }
+
 }
