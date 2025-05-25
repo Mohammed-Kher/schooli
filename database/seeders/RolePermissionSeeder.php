@@ -93,6 +93,12 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Create Attendance', 'slug' => 'create-attendance'],
             ['name' => 'Edit Attendance', 'slug' => 'edit-attendance'],
             ['name' => 'Delete Attendance', 'slug' => 'delete-attendance'],
+
+            // Classroom management
+            ['name' => 'View Classrooms', 'slug' => 'view-classrooms'],
+            ['name' => 'Create Classrooms', 'slug' => 'create-classrooms'],
+            ['name' => 'Edit Classrooms', 'slug' => 'edit-classrooms'],
+            ['name' => 'Delete Classrooms', 'slug' => 'delete-classrooms'],
         ];
 
         foreach ($permissions as $permission) {
@@ -107,7 +113,7 @@ class RolePermissionSeeder extends Seeder
 
         // Assign permissions to roles
         $rolePermissions = [
-            'admin' => ['*'], // Admin gets all permissions
+            'admin' => ['*'],
             'teacher' => [
                 'view-students',
                 'view-parents',
@@ -117,25 +123,25 @@ class RolePermissionSeeder extends Seeder
                 'create-homework',
                 'edit-homework',
                 'delete-homework',
-                // Attendance permissions for teachers
                 'view-attendance',
                 'create-attendance',
                 'edit-attendance',
-                'delete-attendance'
+                'delete-attendance',
+                'view-classrooms'
             ],
             'student' => [
                 'view-departments',
                 'view-subjects',
                 'view-homework',
-                // Students can view their own attendance
-                'view-attendance'
+                'view-attendance',
+                'view-classrooms'
             ],
             'parent' => [
                 'view-departments',
                 'view-subjects',
                 'view-homework',
-                // Parents can view attendance
-                'view-attendance'
+                'view-attendance',
+                'view-classrooms'
             ]
         ];
 
