@@ -11,7 +11,6 @@ class schedule extends Model
         'department_id',
         'day',
         'time',
-        'status',
     ];
 
     public function subjects(): HasMany
