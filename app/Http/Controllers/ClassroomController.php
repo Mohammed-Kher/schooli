@@ -40,7 +40,7 @@ class ClassroomController extends Controller
             return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
         }
 
-        $classroom = Classroom::with(['department', 'students'])->findOrFail($id);
+        $classroom = Classroom::with(['departments', 'students'])->findOrFail($id);
         return response()->json(['data' => $classroom, 'message' => self::RETRIEVED]);
     }
 
