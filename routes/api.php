@@ -25,18 +25,6 @@ use Illuminate\Support\Facades\Route;
 // API Versioning
 Route::prefix('v1')->group(function () {
     // Define your API routes here
-
-    Route::apiResource('classrooms', ClassroomController::class);
-    Route::apiResource('attendances', AttendanceController::class);
-    Route::apiResource('days', DayController::class);
-    Route::apiResource('events', EventController::class);
-    Route::apiResource('homeworks', HomeworkController::class);
-    Route::apiResource('lessons', LessonController::class);
-    Route::apiResource('parents', ParentStudentController::class);
-    Route::apiResource('schedules', ScheduleController::class);
-    Route::apiResource('students', StudentController::class);
-    Route::apiResource('subjects', SubjectController::class);
-    Route::apiResource('teachers', TeacherController::class);
     // public routes
     Route::get('/', function () {
         return response()->json(['message' => 'welcome to the API! v1']);
@@ -48,5 +36,18 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);
         Route::post('/logout', [AuthController::class, 'logout']);
+    });
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::apiResource('classrooms', ClassroomController::class);
+        Route::apiResource('attendances', AttendanceController::class);
+        Route::apiResource('days', DayController::class);
+        Route::apiResource('events', EventController::class);
+        Route::apiResource('homeworks', HomeworkController::class);
+        Route::apiResource('lessons', LessonController::class);
+        Route::apiResource('parents', ParentStudentController::class);
+        Route::apiResource('schedules', ScheduleController::class)->except(['index']);
+        Route::apiResource('students', StudentController::class);
+        Route::apiResource('subjects', SubjectController::class);
+        Route::apiResource('teachers', TeacherController::class);
     });
 });

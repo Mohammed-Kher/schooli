@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -9,12 +10,12 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Define roles
+        // 1. Create Roles
         $roles = [
-            ['name' => 'Admin', 'slug' => 'admin', 'description' => 'System Administrator'],
-            ['name' => 'Teacher', 'slug' => 'teacher', 'description' => 'School Teacher'],
-            ['name' => 'Student', 'slug' => 'student', 'description' => 'School Student'],
-            ['name' => 'Parent', 'slug' => 'parent', 'description' => 'Student Parent'],
+            ['name' => 'المدير', 'slug' => 'admin', 'description' => 'مدير النظام'],
+            ['name' => 'المعلم', 'slug' => 'teacher', 'description' => 'معلم المدرسة'],
+            ['name' => 'الطالب', 'slug' => 'student', 'description' => 'طالب المدرسة'],
+            ['name' => 'الوالد', 'slug' => 'parent', 'description' => 'والد الطالب'],
         ];
 
         foreach ($roles as $role) {
@@ -25,55 +26,34 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        // Define permissions for all controller methods, including attendance
+        // 2. Create Permissions
         $permissions = [
-            // Classroom permissions
-            ['name' => 'View Classrooms', 'slug' => 'view-classrooms', 'description' => 'View classroom information'],
-            ['name' => 'Manage Classrooms', 'slug' => 'manage-classrooms', 'description' => 'Create, update, and delete classrooms'],
-            
-            // Day permissions
-            ['name' => 'View Days', 'slug' => 'view-days', 'description' => 'View schedule days'],
-            ['name' => 'Manage Days', 'slug' => 'manage-days', 'description' => 'Create, update, and delete schedule days'],
-            
-            // Event permissions
-            ['name' => 'View Events', 'slug' => 'view-events', 'description' => 'View events'],
-            ['name' => 'Create Events', 'slug' => 'create-events', 'description' => 'Create new events'],
-            ['name' => 'Edit Events', 'slug' => 'edit-events', 'description' => 'Edit existing events'],
-            ['name' => 'Delete Events', 'slug' => 'delete-events', 'description' => 'Delete events'],
-            
-            // Homework permissions
-            ['name' => 'View Homework', 'slug' => 'view-homework', 'description' => 'View homework assignments'],
-            ['name' => 'Create Homework', 'slug' => 'create-homework', 'description' => 'Create new homework assignments'],
-            ['name' => 'Edit Homework', 'slug' => 'edit-homework', 'description' => 'Edit existing homework assignments'],
-            ['name' => 'Delete Homework', 'slug' => 'delete-homework', 'description' => 'Delete homework assignments'],
-            
-            // Lesson permissions
-            ['name' => 'View Lessons', 'slug' => 'view-lessons', 'description' => 'View lesson schedules'],
-            ['name' => 'Manage Lessons', 'slug' => 'manage-lessons', 'description' => 'Create, update, and delete lessons'],
-            
-            // ParentStudent permissions
-            ['name' => 'View Parent Students', 'slug' => 'view-parent_students', 'description' => 'View parent-student relationships'],
-            ['name' => 'Manage Parent Students', 'slug' => 'manage-parent_students', 'description' => 'Create, update, and delete parent-student relationships'],
-            
-            // Schedule permissions
-            ['name' => 'View Schedules', 'slug' => 'view-schedules', 'description' => 'View classroom schedules'],
-            ['name' => 'Manage Schedules', 'slug' => 'manage-schedules', 'description' => 'Create, update, and delete schedules'],
-            
-            // Student permissions
-            ['name' => 'View Students', 'slug' => 'view-students', 'description' => 'View student information'],
-            ['name' => 'Manage Students', 'slug' => 'manage-students', 'description' => 'Create, update, and delete students'],
-            
-            // Subject permissions
-            ['name' => 'View Subjects', 'slug' => 'view-subjects', 'description' => 'View subject information'],
-            ['name' => 'Manage Subjects', 'slug' => 'manage-subjects', 'description' => 'Create, update, and delete subjects'],
-            
-            // Teacher permissions
-            ['name' => 'View Teachers', 'slug' => 'view-teachers', 'description' => 'View teacher information'],
-            ['name' => 'Manage Teachers', 'slug' => 'manage-teachers', 'description' => 'Create, update, and delete teachers'],
-            
-            // Attendance permissions
-            ['name' => 'View Attendance', 'slug' => 'view-attendance', 'description' => 'View attendance records'],
-            ['name' => 'Manage Attendance', 'slug' => 'manage-attendance', 'description' => 'Create, update, and delete attendance records'],
+            ['name' => 'عرض الفصول', 'slug' => 'view-classrooms', 'description' => 'عرض معلومات الفصول'],
+            ['name' => 'إدارة الفصول', 'slug' => 'manage-classrooms', 'description' => 'إنشاء وتحديث وحذف الفصول'],
+            ['name' => 'عرض الأيام', 'slug' => 'view-days', 'description' => 'عرض أيام الجدول'],
+            ['name' => 'إدارة الأيام', 'slug' => 'manage-days', 'description' => 'إنشاء وتحديث وحذف أيام الجدول'],
+            ['name' => 'عرض الأحداث', 'slug' => 'view-events', 'description' => 'عرض الأحداث'],
+            ['name' => 'إنشاء الأحداث', 'slug' => 'create-events', 'description' => 'إنشاء أحداث جديدة'],
+            ['name' => 'تعديل الأحداث', 'slug' => 'edit-events', 'description' => 'تعديل الأحداث الموجودة'],
+            ['name' => 'حذف الأحداث', 'slug' => 'delete-events', 'description' => 'حذف الأحداث'],
+            ['name' => 'عرض الواجبات', 'slug' => 'view-homework', 'description' => 'عرض الواجبات المنزلية'],
+            ['name' => 'إنشاء الواجبات', 'slug' => 'create-homework', 'description' => 'إنشاء واجبات منزلية جديدة'],
+            ['name' => 'تعديل الواجبات', 'slug' => 'edit-homework', 'description' => 'تعديل الواجبات المنزلية'],
+            ['name' => 'حذف الواجبات', 'slug' => 'delete-homework', 'description' => 'حذف الواجبات المنزلية'],
+            ['name' => 'عرض الدروس', 'slug' => 'view-lessons', 'description' => 'عرض جدول الدروس'],
+            ['name' => 'إدارة الدروس', 'slug' => 'manage-lessons', 'description' => 'إنشاء وتحديث وحذف الدروس'],
+            ['name' => 'عرض أولياء الأمور', 'slug' => 'view-parent_students', 'description' => 'عرض علاقات أولياء الأمور والطلاب'],
+            ['name' => 'إدارة أولياء الأمور', 'slug' => 'manage-parent_students', 'description' => 'إنشاء وتحديث وحذف علاقات أولياء الأمور'],
+            ['name' => 'عرض الجداول', 'slug' => 'view-schedules', 'description' => 'عرض جداول الفصول'],
+            ['name' => 'إدارة الجداول', 'slug' => 'manage-schedules', 'description' => 'إنشاء وتحديث وحذف الجداول'],
+            ['name' => 'عرض الطلاب', 'slug' => 'view-students', 'description' => 'عرض معلومات الطلاب'],
+            ['name' => 'إدارة الطلاب', 'slug' => 'manage-students', 'description' => 'إنشاء وتحديث وحذف الطلاب'],
+            ['name' => 'عرض المواد', 'slug' => 'view-subjects', 'description' => 'عرض معلومات المواد'],
+            ['name' => 'إدارة المواد', 'slug' => 'manage-subjects', 'description' => 'إنشاء وتحديث وحذف المواد'],
+            ['name' => 'عرض المعلمين', 'slug' => 'view-teachers', 'description' => 'عرض معلومات المعلمين'],
+            ['name' => 'إدارة المعلمين', 'slug' => 'manage-teachers', 'description' => 'إنشاء وتحديث وحذف المعلمين'],
+            ['name' => 'عرض الحضور', 'slug' => 'view-attendance', 'description' => 'عرض سجلات الحضور'],
+            ['name' => 'إدارة الحضور', 'slug' => 'manage-attendance', 'description' => 'إنشاء وتحديث وحذف سجلات الحضور'],
         ];
 
         foreach ($permissions as $permission) {
@@ -84,7 +64,7 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        // Assign all permissions to Admin
+        // 3. Assign Permissions to Roles
         $adminRoleId = DB::table('roles')->where('slug', 'admin')->first()->id;
         $allPermissionIds = DB::table('permissions')->pluck('id')->toArray();
         foreach ($allPermissionIds as $permissionId) {
@@ -94,61 +74,55 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        // Role-specific permissions
         $rolePermissions = [
             'teacher' => [
-                'view-classrooms',
-                'view-days',
-                'view-events',
-                'create-events',
-                'edit-events',
-                'delete-events',
-                'view-homework',
-                'create-homework',
-                'edit-homework',
-                'delete-homework',
-                'view-lessons',
-                'view-schedules',
-                'view-students',
-                'view-subjects',
-                'view-teachers',
-                'view-attendance',
+                'view-classrooms', 'view-days', 'view-events', 'create-events', 'edit-events', 'delete-events',
+                'view-homework', 'create-homework', 'edit-homework', 'delete-homework', 'view-lessons',
+                'view-schedules', 'view-students', 'view-subjects', 'view-teachers', 'view-attendance',
                 'manage-attendance',
             ],
             'student' => [
-                'view-classrooms',
-                'view-days',
-                'view-events',
-                'view-homework',
-                'view-lessons',
-                'view-schedules',
-                'view-students', // Filtered to own info in controller
-                'view-subjects',
-                'view-attendance', // Filtered to own attendance
+                'view-classrooms', 'view-days', 'view-events', 'view-homework', 'view-lessons',
+                'view-schedules', 'view-students', 'view-subjects', 'view-attendance',
             ],
             'parent' => [
-                'view-classrooms',
-                'view-days',
-                'view-events',
-                'view-homework',
-                'view-lessons',
-                'view-schedules',
-                'view-students', // Filtered to child's info in controller
-                'view-subjects',
-                'view-attendance', // Filtered to child's attendance
+                'view-classrooms', 'view-days', 'view-events', 'view-homework', 'view-lessons',
+                'view-schedules', 'view-students', 'view-subjects', 'view-attendance',
             ],
         ];
 
         foreach ($rolePermissions as $roleSlug => $permissionSlugs) {
             $roleId = DB::table('roles')->where('slug', $roleSlug)->first()->id;
             foreach ($permissionSlugs as $permissionSlug) {
-                $permissionId = DB::table('permissions')
-                    ->where('slug', $permissionSlug)
-                    ->first()
-                    ->id;
+                $permissionId = DB::table('permissions')->where('slug', $permissionSlug)->first()->id;
                 DB::table('permission_role')->insert([
                     'role_id' => $roleId,
                     'permission_id' => $permissionId,
+                ]);
+            }
+        }
+
+        // 4. Assign Roles to Users (Assuming Users from DatabaseSeeder)
+        $userRoles = [
+            ['email' => 'admin@school.com', 'role_slug' => 'admin'],
+            ['email' => 'ahmed.teacher@school.com', 'role_slug' => 'teacher'],
+            ['email' => 'fatima.teacher@school.com', 'role_slug' => 'teacher'],
+            ['email' => 'khalid.parent@school.com', 'role_slug' => 'parent'],
+            ['email' => 'noura.parent@school.com', 'role_slug' => 'parent'],
+            ['email' => 'abdullah.student@school.com', 'role_slug' => 'student'],
+            ['email' => 'sara.student@school.com', 'role_slug' => 'student'],
+            ['email' => 'yusuf.student@school.com', 'role_slug' => 'student'],
+            ['email' => 'laila.student@school.com', 'role_slug' => 'student'],
+            ['email' => 'ali.student@school.com', 'role_slug' => 'student'],
+        ];
+
+        foreach ($userRoles as $userRole) {
+            $user = User::where('email', $userRole['email'])->first();
+            if ($user) {
+                $roleId = DB::table('roles')->where('slug', $userRole['role_slug'])->first()->id;
+                DB::table('role_user')->insert([
+                    'user_id' => $user->id,
+                    'role_id' => $roleId,
                 ]);
             }
         }

@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('homeworks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
-            $table->foreignId('teacher_id')->constrained('teacher_profiles')->onDelete('cascade');
+            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
             $table->string('name');
             $table->text('description');
             $table->date('due_date');

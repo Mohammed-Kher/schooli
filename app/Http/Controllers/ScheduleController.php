@@ -8,19 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ScheduleController extends Controller
 {
-    public function index()
-    {
-        if (!Auth::user()->hasPermission('view-schedules')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-        $schedules = Schedule::with('classroom', 'days')->get();
-        return response()->json([
-            'data' => $schedules->toArray(),
-            'status' => self::HTTP_OK,
-            'message' => self::RETRIEVED,
-        ]);
-    }
-
     public function store(Request $request)
     {
         if (!Auth::user()->hasPermission('manage-schedules')) {
