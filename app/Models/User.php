@@ -74,28 +74,4 @@ class User extends Authenticatable
             ->exists();
     }
 
-    public function studentProfile(): HasOne
-    {
-        return $this->hasOne(StudentProfile::class);
-    }
-
-    public function teacherProfile(): HasOne
-    {
-        return $this->hasOne(TeacherProfile::class);
-    }
-
-    public function parentProfile(): HasOne
-    {
-        return $this->hasOne(ParentProfile::class);
-    }
-
-    public function attendances()
-    {
-        return $this->hasMany(attendance::class);
-    }
-
-    public function notes()
-    {
-        return $this->hasMany(note::class);
-    }
 }
