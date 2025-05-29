@@ -20,8 +20,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/', function () {
         return response()->json(['message' => 'welcome to the API! v1']);
     });
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::post('/auth/login', [AuthController::class, 'login']);
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
