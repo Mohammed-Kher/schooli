@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Homework;
-use App\Models\Teacher;
+use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class HomeworkController extends Controller
+class LessonController extends Controller
 {
     public function index()
     {
-        if (!Auth::user()->hasPermission('view-homework')) {
+        if (!Auth::user()->hasPermission('view-lessons')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $homeworks = Homework::with('subject', 'teacher')->get();
+        $lessons = Lesson::with('day', 'subject')->get();
         return response()->json([
-            'data' => $homeworks->toArray(),
+            'data' => $lessons->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::RETRIEVED,
         ]);
@@ -24,62 +23,61 @@ class HomeworkController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('create-homework')) {
+        if (!Auth::user()->hasPermission('manage-lessons')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $teacher = Teacher::where('user_id', Auth::id())->firstOrFail();
         $validatedData = $request->validate([
+            'day_id' => ['required', 'exists:days,id'],
             'subject_id' => ['required', 'exists:subjects,id'],
-            'name' => ['required', 'string'],
-            'description' => ['nullable', 'string'],
-            'due_date' => ['required', 'date'],
+            'start_time' => ['required', 'date_format:H:i'],
+            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
         ]);
-        $homework = Homework::create(array_merge($validatedData, ['teacher_id' => $teacher->id]));
+        $lesson = Lesson::create($validatedData);
         return response()->json([
-            'data' => $homework->toArray(),
+            'data' => $lesson->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::CREATED,
         ]);
     }
 
-    public function show(Homework $homework)
+    public function show(Lesson $lesson)
     {
-        if (!Auth::user()->hasPermission('view-homework')) {
+        if (!Auth::user()->hasPermission('view-lessons')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $homework->load('subject', 'teacher');
+        $lesson->load('day', 'subject');
         return response()->json([
-            'data' => $homework->toArray(),
+            'data' => $lesson->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::RETRIEVED,
         ]);
     }
 
-    public function update(Request $request, Homework $homework)
+    public function update(Request $request, Lesson $lesson)
     {
-        if (!Auth::user()->hasPermission('edit-homework')) {
+        if (!Auth::user()->hasPermission('manage-lessons')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $validatedData = $request->validate([
+            'day_id' => ['sometimes', 'exists:days,id'],
             'subject_id' => ['sometimes', 'exists:subjects,id'],
-            'name' => ['sometimes', 'string'],
-            'description' => ['sometimes', 'string'],
-            'due_date' => ['sometimes', 'date'],
+            'start_time' => ['sometimes', 'date_format:H:i'],
+            'end_time' => ['sometimes', 'date_format:H:i', 'after:start_time'],
         ]);
-        $homework->update($validatedData);
+        $lesson->update($validatedData);
         return response()->json([
-            'data' => $homework->toArray(),
+            'data' => $lesson->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::UPDATED,
         ]);
     }
 
-    public function destroy(Homework $homework)
+    public function destroy(Lesson $lesson)
     {
-        if (!Auth::user()->hasPermission('delete-homework')) {
+        if (!Auth::user()->hasPermission('manage-lessons')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $homework->delete();
+        $lesson->delete();
         return response()->json([
             'data' => null,
             'status' => self::HTTP_OK,

@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class TeacherProfile extends Model
+class Teacher extends Model
 {
-    use HasFactory;
-
+    protected $table = 'teachers';
     protected $fillable = [
         'user_id',
-        'subject_id',
+        'name',
     ];
 
     public function user(): BelongsTo
@@ -20,8 +19,13 @@ class TeacherProfile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function subject(): BelongsTo
+    public function subjects(): HasOne
     {
-        return $this->belongsTo(Subject::class);
+        return $this->hasOne(Subject::class);
+    }
+
+    public function role(): string
+    {
+        return 'teacher';
     }
 }

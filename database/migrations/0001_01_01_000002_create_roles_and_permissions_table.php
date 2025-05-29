@@ -10,7 +10,6 @@ return new class extends Migration {
      */
     public function up(): void
     {
-
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -39,27 +38,6 @@ return new class extends Migration {
             $table->primary(['permission_id', 'role_id']);
         });
 
-        Schema::create('student_profiles', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('department_id')->constrained('departments');
-            $table->timestamps();
-        });
-
-        Schema::create('teacher_profiles', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('subject_id')->constrained('subjects');
-            $table->timestamps();
-        });
-
-        Schema::create('parent_profiles', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('student_id')->constrained('student_profiles');
-            $table->timestamps();
-        });
-
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
@@ -81,14 +59,11 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
-        Schema::dropIfExists('permissions');
-        Schema::dropIfExists('role_user');
-        Schema::dropIfExists('permission_role');
-        Schema::dropIfExists('student_profiles');
-        Schema::dropIfExists('teacher_profiles');
-        Schema::dropIfExists('parent_profiles');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('permission_role');
+        Schema::dropIfExists('role_user');
+        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('roles');
     }
 };

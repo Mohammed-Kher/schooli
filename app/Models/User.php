@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -65,37 +66,29 @@ class User extends Authenticatable
         return $this->roles()->where('slug', $role)->exists();
     }
 
-    public function hasPermission(string $permission): bool
+/**
+     * Check if the user has a specific permission.
+     *
+     * @param string $permissionSlug
+     * @return bool
+     */
+    public function hasPermission(string $permissionSlug): bool
     {
-        return $this->roles()
-            ->whereHas('permissions', function ($query) use ($permission) {
-                $query->where('slug', $permission);
-            })
+        return DB::table('role_user')
+            ->join('permission_role', 'role_user.role_id', '=', 'permission_role.role_id')
+            ->join('permissions', 'permission_role.permission_id', '=', 'permissions.id')
+            ->where('role_user.user_id', $this->id)
+            ->where('permissions.slug', $permissionSlug)
             ->exists();
     }
 
-    public function studentProfile(): HasOne
+    public function teacher(): HasOne
     {
-        return $this->hasOne(StudentProfile::class);
+        return $this->hasOne(Teacher::class);
     }
 
-    public function teacherProfile(): HasOne
+    public function parent(): HasOne
     {
-        return $this->hasOne(TeacherProfile::class);
-    }
-
-    public function parentProfile(): HasOne
-    {
-        return $this->hasOne(ParentProfile::class);
-    }
-
-    public function attendances()
-    {
-        return $this->hasMany(attendance::class);
-    }
-
-    public function notes()
-    {
-        return $this->hasMany(note::class);
+        return $this->hasOne(Parent::class);
     }
 }

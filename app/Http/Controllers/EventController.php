@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Homework;
-use App\Models\Teacher;
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class HomeworkController extends Controller
+class EventController extends Controller
 {
     public function index()
     {
-        if (!Auth::user()->hasPermission('view-homework')) {
+        if (!Auth::user()->hasPermission('view-events')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $homeworks = Homework::with('subject', 'teacher')->get();
+        $events = Event::with('subject', 'classroom')->get();
         return response()->json([
-            'data' => $homeworks->toArray(),
+            'data' => $events->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::RETRIEVED,
         ]);
@@ -24,62 +23,67 @@ class HomeworkController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('create-homework')) {
+        if (!Auth::user()->hasPermission('create-events')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $teacher = Teacher::where('user_id', Auth::id())->firstOrFail();
         $validatedData = $request->validate([
+            'classroom_id' => ['required', 'exists:classrooms,id'],
             'subject_id' => ['required', 'exists:subjects,id'],
-            'name' => ['required', 'string'],
+            'type' => ['required', 'string'],
+            'title' => ['required', 'string'],
             'description' => ['nullable', 'string'],
-            'due_date' => ['required', 'date'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
         ]);
-        $homework = Homework::create(array_merge($validatedData, ['teacher_id' => $teacher->id]));
+        $event = Event::create($validatedData);
         return response()->json([
-            'data' => $homework->toArray(),
+            'data' => $event->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::CREATED,
         ]);
     }
 
-    public function show(Homework $homework)
+    public function show(Event $event)
     {
-        if (!Auth::user()->hasPermission('view-homework')) {
+        if (!Auth::user()->hasPermission('view-events')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $homework->load('subject', 'teacher');
+        $event->load('subject', 'classroom');
         return response()->json([
-            'data' => $homework->toArray(),
+            'data' => $event->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::RETRIEVED,
         ]);
     }
 
-    public function update(Request $request, Homework $homework)
+    public function update(Request $request, Event $event)
     {
-        if (!Auth::user()->hasPermission('edit-homework')) {
+        if (!Auth::user()->hasPermission('edit-events')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $validatedData = $request->validate([
+            'classroom_id' => ['sometimes', 'exists:classrooms,id'],
             'subject_id' => ['sometimes', 'exists:subjects,id'],
-            'name' => ['sometimes', 'string'],
+            'type' => ['sometimes', 'string'],
+            'title' => ['sometimes', 'string'],
             'description' => ['sometimes', 'string'],
-            'due_date' => ['sometimes', 'date'],
+            'start_date' => ['sometimes', 'date'],
+            'end_date' => ['sometimes', 'date', 'after_or_equal:start_date'],
         ]);
-        $homework->update($validatedData);
+        $event->update($validatedData);
         return response()->json([
-            'data' => $homework->toArray(),
+            'data' => $event->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::UPDATED,
         ]);
     }
 
-    public function destroy(Homework $homework)
+    public function destroy(Event $event)
     {
-        if (!Auth::user()->hasPermission('delete-homework')) {
+        if (!Auth::user()->hasPermission('delete-events')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $homework->delete();
+        $event->delete();
         return response()->json([
             'data' => null,
             'status' => self::HTTP_OK,

@@ -6,20 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class subject extends Model
+class Schedule extends Model
 {
     protected $fillable = [
-        'classroom_id',
-        'name',
+        'classroom_id'
     ];
 
     public function classroom(): BelongsTo
     {
-        return $this->belongsTo(classroom::class);
+        return $this->belongsTo(Classroom::class);
     }
-
-    public function homeworks(): HasMany
+    public function days(): HasMany 
     {
-        return $this->hasMany(homework::class);
+        return $this->hasMany(Day::class);
     }
 }

@@ -2,17 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class ParentProfile extends Model
+class ParentStudent extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
-        'student_id',
     ];
 
     public function user(): BelongsTo
@@ -20,8 +17,8 @@ class ParentProfile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function student(): BelongsTo
+    public function role(): string
     {
-        return $this->belongsTo(StudentProfile::class, 'student_id');
+        return 'parent';
     }
 }

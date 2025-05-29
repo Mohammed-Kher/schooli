@@ -4,72 +4,78 @@ namespace App\Http\Controllers;
 
 use App\Models\Classroom;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class ClassroomController extends Controller
 {
-    public function index(): JsonResponse
+    public function index()
     {
-        if (!auth()->user()->hasPermission('view-classrooms')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('view-classrooms')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $classrooms = Classroom::with(['department', 'students'])->get();
-        return response()->json(['data' => $classrooms, 'message' => self::RETRIEVED]);
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        if (!auth()->user()->hasPermission('create-classrooms')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'department_id' => 'required|exists:departments,id',
-            'capacity' => 'required|integer|min:1'
+        $classrooms = Classroom::all();
+        $classrooms->load('students', 'schedule', 'events', 'subjects');
+        return response()->json([
+            'data' => $classrooms->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::RETRIEVED,
         ]);
-
-        Classroom::create($validated);
-        return response()->json(['message' => self::CREATED], self::HTTP_OK);
     }
 
-    public function show(int $id): JsonResponse
+    public function store(Request $request)
     {
-        if (!auth()->user()->hasPermission('view-classrooms')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('manage-classrooms')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $classroom = Classroom::with(['departments', 'students'])->findOrFail($id);
-        return response()->json(['data' => $classroom, 'message' => self::RETRIEVED]);
-    }
-
-    public function update(Request $request, int $id): JsonResponse
-    {
-        if (!auth()->user()->hasPermission('edit-classrooms')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
-        }
-
-        $classroom = Classroom::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'department_id' => 'sometimes|exists:departments,id',
-            'capacity' => 'sometimes|integer|min:1'
+        $validatedData = $request->validate([
+            'name' => ['required', 'string'],
         ]);
-
-        $classroom->update($validated);
-        return response()->json(['message' => self::UPDATED]);
+        Classroom::create($validatedData);
+        return response()->json([
+            'data' => null,
+            'status' => self::HTTP_OK,
+            'message' => self::CREATED,
+        ]);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function show(Classroom $classroom)
     {
-        if (!auth()->user()->hasPermission('delete-classrooms')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('view-classrooms')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
+        return response()->json([
+            'data' => $classroom,
+            'status' => self::HTTP_OK,
+            'message' => self::RETRIEVED,
+        ]);
+    }
 
-        $classroom = Classroom::findOrFail($id);
+    public function update(Request $request, Classroom $classroom)
+    {
+        if (!Auth::user()->hasPermission('manage-classrooms')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $validatedData = $request->validate([
+            'name' => ['required', 'string'],
+        ]);
+        $classroom->update($validatedData);
+        return response()->json([
+            'data' => $classroom,
+            'status' => self::HTTP_OK,
+            'message' => self::UPDATED,
+        ]);
+    }
+
+    public function destroy(Classroom $classroom)
+    {
+        if (!Auth::user()->hasPermission('manage-classrooms')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
         $classroom->delete();
-        return response()->json(['message' => self::DELETED]);
+        return response()->json([
+            'data' => null,
+            'status' => self::HTTP_OK,
+            'message' => self::DELETED,
+        ]);
     }
 }

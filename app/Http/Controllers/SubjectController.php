@@ -4,74 +4,82 @@ namespace App\Http\Controllers;
 
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class SubjectController extends Controller
 {
-    public function index(): JsonResponse
+    public function index()
     {
-        if (!auth()->user()->hasPermission('view-subjects')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('view-subjects')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $subjects = Subject::with(['department', 'teacher'])->get();
-        return response()->json(['data' => $subjects, 'message' => self::RETRIEVED]);
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        if (!auth()->user()->hasPermission('create-subjects')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'department_id' => 'required|exists:departments,id',
-            'teacher_id' => 'required|exists:users,id'
+        $subjects = Subject::with('teacher', 'classroom')->get();
+        return response()->json([
+            'data' => $subjects->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::RETRIEVED,
         ]);
-
-        Subject::create($validated);
-        return response()->json(['message' => self::CREATED], self::HTTP_OK);
     }
 
-    public function show(int $id): JsonResponse
+    public function store(Request $request)
     {
-        if (!auth()->user()->hasPermission('view-subjects')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('manage-subjects')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $subject = Subject::with(['department', 'teacher'])->findOrFail($id);
-        return response()->json(['data' => $subject, 'message' => self::RETRIEVED]);
-    }
-
-    public function update(Request $request, int $id): JsonResponse
-    {
-        if (!auth()->user()->hasPermission('edit-subjects')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
-        }
-
-        $subject = Subject::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'department_id' => 'sometimes|exists:departments,id',
-            'teacher_id' => 'sometimes|exists:users,id'
+        $validatedData = $request->validate([
+            'name' => ['required', 'string'],
+            'teacher_id' => ['required', 'exists:teachers,id'],
+            'classroom_id' => ['required', 'exists:classrooms,id'],
         ]);
-
-        $subject->update($validated);
-        return response()->json(['message' => self::UPDATED]);
+        $subject = Subject::create($validatedData);
+        return response()->json([
+            'data' => $subject->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::CREATED,
+        ]);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function show(Subject $subject)
     {
-        if (!auth()->user()->hasPermission('delete-subjects')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('view-subjects')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
+        $subject->load('teacher', 'classroom');
+        return response()->json([
+            'data' => $subject->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::RETRIEVED,
+        ]);
+    }
 
-        $subject = Subject::findOrFail($id);
+    public function update(Request $request, Subject $subject)
+    {
+        if (!Auth::user()->hasPermission('manage-subjects')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $validatedData = $request->validate([
+            'name' => ['sometimes', 'string'],
+            'teacher_id' => ['sometimes', 'exists:teachers,id'],
+            'classroom_id' => ['sometimes', 'exists:classrooms,id'],
+        ]);
+        $subject->update($validatedData);
+        return response()->json([
+            'data' => $subject->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::UPDATED,
+        ]);
+    }
+
+    public function destroy(Subject $subject)
+    {
+        if (!Auth::user()->hasPermission('manage-subjects')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
         $subject->delete();
-        return response()->json(['message' => self::DELETED]);
+        return response()->json([
+            'data' => null,
+            'status' => self::HTTP_OK,
+            'message' => self::DELETED,
+        ]);
     }
 }

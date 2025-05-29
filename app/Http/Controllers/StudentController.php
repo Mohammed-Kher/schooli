@@ -2,81 +2,88 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Student;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
-    public function index(): JsonResponse
+    public function index()
     {
-        if (!auth()->user()->hasPermission('view-students')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('view-students')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $students = User::whereHas('roles', function ($q) {
-            $q->where('slug', 'student');
-        })->with('studentProfile')->get();
-
-        return response()->json(['data' => $students, 'message' => self::RETRIEVED]);
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        if (!auth()->user()->hasPermission('create-students')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
-            'classroom_id' => 'required|exists:classrooms,id'
+        $students = Student::with('parent.user', 'classroom')->get();
+        return response()->json([
+            'data' => $students->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::RETRIEVED,
         ]);
-
-        // Create student logic here
-        return response()->json(['message' => self::CREATED], self::HTTP_OK);
     }
 
-    public function show(int $id): JsonResponse
+    public function store(Request $request)
     {
-        if (!auth()->user()->hasPermission('view-students')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('manage-students')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $student = User::whereHas('roles', function ($q) {
-            $q->where('slug', 'student');
-        })->with('studentProfile')->findOrFail($id);
-
-        return response()->json(['data' => $student, 'message' => self::RETRIEVED]);
-    }
-
-    public function update(Request $request, int $id): JsonResponse
-    {
-        if (!auth()->user()->hasPermission('edit-students')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
-        }
-
-        $student = User::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'classroom_id' => 'sometimes|exists:classrooms,id'
+        $validatedData = $request->validate([
+            'parent_id' => ['required', 'exists:parent_students,id'],
+            'classroom_id' => ['required', 'exists:classrooms,id'],
+            'gender' => ['required', 'string'],
+            'name' => ['required', 'string'],
+            'birth_date' => ['required', 'date'],
         ]);
-
-        $student->update($validated);
-        return response()->json(['message' => self::UPDATED]);
+        $student = Student::create($validatedData);
+        return response()->json([
+            'data' => $student->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::CREATED,
+        ]);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function show(Student $student)
     {
-        if (!auth()->user()->hasPermission('delete-students')) {
-            return response()->json(['message' => self::UNAUTHORIZED], self::HTTP_UNAUTHORIZED);
+        if (!Auth::user()->hasPermission('view-students')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
+        $student->load('parent.user', 'classroom');
+        return response()->json([
+            'data' => $student->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::RETRIEVED,
+        ]);
+    }
 
-        $student = User::findOrFail($id);
+    public function update(Request $request, Student $student)
+    {
+        if (!Auth::user()->hasPermission('manage-students')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $validatedData = $request->validate([
+            'parent_id' => ['sometimes', 'exists:parent_students,id'],
+            'classroom_id' => ['sometimes', 'exists:classrooms,id'],
+            'gender' => ['sometimes', 'string'],
+            'name' => ['sometimes', 'string'],
+            'birth_date' => ['sometimes', 'date'],
+        ]);
+        $student->update($validatedData);
+        return response()->json([
+            'data' => $student->toArray(),
+            'status' => self::HTTP_OK,
+            'message' => self::UPDATED,
+        ]);
+    }
+
+    public function destroy(Student $student)
+    {
+        if (!Auth::user()->hasPermission('manage-students')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
         $student->delete();
-        return response()->json(['message' => self::DELETED]);
+        return response()->json([
+            'data' => null,
+            'status' => self::HTTP_OK,
+            'message' => self::DELETED,
+        ]);
     }
 }
