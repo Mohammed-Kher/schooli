@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Teacher;
+use App\Models\Day;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class TeacherController extends Controller
+class DayController extends Controller
 {
     public function index()
     {
-        if (!Auth::user()->hasPermission('view-teachers')) {
+        if (!Auth::user()->hasPermission('view-days')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $teachers = Teacher::with('user', 'subjects')->get();
+        $days = Day::with('schedule', 'lessons')->get();
         return response()->json([
-            'data' => $teachers->toArray(),
+            'data' => $days->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::RETRIEVED,
         ]);
@@ -23,57 +23,57 @@ class TeacherController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('manage-teachers')) {
+        if (!Auth::user()->hasPermission('manage-days')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $validatedData = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-            'name' => ['required', 'string'],
+            'schedule_id' => ['required', 'exists:schedules,id'],
+            'day' => ['required', 'string'],
         ]);
-        $teacher = Teacher::create($validatedData);
+        $day = Day::create($validatedData);
         return response()->json([
-            'data' => $teacher->toArray(),
+            'data' => $day->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::CREATED,
         ]);
     }
 
-    public function show(Teacher $teacher)
+    public function show(Day $day)
     {
-        if (!Auth::user()->hasPermission('view-teachers')) {
+        if (!Auth::user()->hasPermission('view-days')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $teacher->load('user', 'subjects');
+        $day->load('schedule', 'lessons');
         return response()->json([
-            'data' => $teacher->toArray(),
+            'data' => $day->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::RETRIEVED,
         ]);
     }
 
-    public function update(Request $request, Teacher $teacher)
+    public function update(Request $request, Day $day)
     {
-        if (!Auth::user()->hasPermission('manage-teachers')) {
+        if (!Auth::user()->hasPermission('manage-days')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $validatedData = $request->validate([
-            'user_id' => ['sometimes', 'exists:users,id'],
-            'name' => ['sometimes', 'string'],
+            'schedule_id' => ['sometimes', 'exists:schedules,id'],
+            'day' => ['sometimes', 'string'],
         ]);
-        $teacher->update($validatedData);
+        $day->update($validatedData);
         return response()->json([
-            'data' => $teacher->toArray(),
+            'data' => $day->toArray(),
             'status' => self::HTTP_OK,
             'message' => self::UPDATED,
         ]);
     }
 
-    public function destroy(Teacher $teacher)
+    public function destroy(Day $day)
     {
-        if (!Auth::user()->hasPermission('manage-teachers')) {
+        if (!Auth::user()->hasPermission('manage-days')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $teacher->delete();
+        $day->delete();
         return response()->json([
             'data' => null,
             'status' => self::HTTP_OK,
