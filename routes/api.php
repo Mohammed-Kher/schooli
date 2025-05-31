@@ -34,8 +34,8 @@ Route::prefix('v1')->group(function () {
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/user', [AuthController::class, 'user']);
-        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('auth/user', [AuthController::class, 'user']);
+        Route::post('auth/logout', [AuthController::class, 'logout']);
     });
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('classrooms', ClassroomController::class);

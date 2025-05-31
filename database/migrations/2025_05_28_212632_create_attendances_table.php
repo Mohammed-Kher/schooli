@@ -12,7 +12,7 @@ class CreateAttendancesTable extends Migration
             $table->id();
             $table->foreignId('lesson_id')->constrained()->onDelete('cascade');
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['حاضر', 'غائب', 'متأخر', 'معتذر'])->default('present');
+            $table->enum('status', ['حاضر', 'غائب', 'متأخر', 'معتذر'])->default('حاضر');
             $table->timestamps();
         });
     }

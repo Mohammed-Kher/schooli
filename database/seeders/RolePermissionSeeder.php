@@ -76,18 +76,45 @@ class RolePermissionSeeder extends Seeder
 
         $rolePermissions = [
             'teacher' => [
-                'view-classrooms', 'view-days', 'view-events', 'create-events', 'edit-events', 'delete-events',
-                'view-homework', 'create-homework', 'edit-homework', 'delete-homework', 'view-lessons',
-                'view-schedules', 'view-students', 'view-subjects', 'view-teachers', 'view-attendance',
+                'view-classrooms',
+                'view-days',
+                'view-events',
+                'create-events',
+                'edit-events',
+                'delete-events',
+                'view-homework',
+                'create-homework',
+                'edit-homework',
+                'delete-homework',
+                'view-lessons',
+                'view-schedules',
+                'view-students',
+                'view-subjects',
+                'view-teachers',
+                'view-attendance',
                 'manage-attendance',
             ],
             'student' => [
-                'view-classrooms', 'view-days', 'view-events', 'view-homework', 'view-lessons',
-                'view-schedules', 'view-students', 'view-subjects', 'view-attendance',
+                'view-classrooms',
+                'view-days',
+                'view-events',
+                'view-homework',
+                'view-lessons',
+                'view-schedules',
+                'view-students',
+                'view-subjects',
+                'view-attendance',
             ],
             'parent' => [
-                'view-classrooms', 'view-days', 'view-events', 'view-homework', 'view-lessons',
-                'view-schedules', 'view-students', 'view-subjects', 'view-attendance',
+                'view-classrooms',
+                'view-days',
+                'view-events',
+                'view-homework',
+                'view-lessons',
+                'view-schedules',
+                'view-students',
+                'view-subjects',
+                'view-attendance',
             ],
         ];
 
@@ -118,13 +145,36 @@ class RolePermissionSeeder extends Seeder
 
         foreach ($userRoles as $userRole) {
             $user = User::where('email', $userRole['email'])->first();
-            if ($user) {
-                $roleId = DB::table('roles')->where('slug', $userRole['role_slug'])->first()->id;
-                DB::table('role_user')->insert([
-                    'user_id' => $user->id,
-                    'role_id' => $roleId,
-                ]);
+
+            if (!$user) {
+                echo "User with email {$userRole['email']} not found!\n";
+                continue;
             }
+
+            $role = DB::table('roles')->where('slug', $userRole['role_slug'])->first();
+
+            if (!$role) {
+                echo "Role with slug {$userRole['role_slug']} not found!\n";
+                continue;
+            }
+
+            DB::table('role_user')->insert([
+                'user_id' => $user->id,
+                'role_id' => $role->id,
+            ]);
+
+            echo "Assigned role {$role->name} to user {$user->email}\n";
         }
+
+        // foreach ($userRoles as $userRole) {
+            // $user = User::where('email', $userRole['email'])->first();
+            // if ($user) {
+                // $roleId = DB::table('roles')->where('slug', $userRole['role_slug'])->first()->id;
+                // DB::table('role_user')->insert([
+                    // 'user_id' => $user->id,
+                    // 'role_id' => $roleId,
+                // ]);
+            // }
+        // }
     }
 }

@@ -156,8 +156,8 @@ class DataSeeder extends Seeder
 
         // 2. Create Classrooms
         $classrooms = [
-            ['name' => 'الفصل الأول'],
-            ['name' => 'الفصل الثاني'],
+            ['name' => 'الصف الأول'],
+            ['name' => 'الصف الثاني'],
         ];
 
         foreach ($classrooms as $classroomData) {
