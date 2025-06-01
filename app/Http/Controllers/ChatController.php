@@ -372,8 +372,16 @@ class ChatController extends Controller
         }
     }
 
-    private function getUnreadCount($conversationId, $userType)
+    public function getUnreadCount(?Request $request,?int $conversationId, ?string $userType = null)
     {
+        if(!$userType) {
+            $userType = $this->getUserType(auth()->user());
+        }
+        if(!$conversationId) {
+            $conversationId = $request->validate([
+                'conversation_id' => 'required|exists:conversations,id',
+            ]);
+        }
         $senderType = $userType === 'parent' ? 'App\Models\Teacher' : 'App\Models\ParentStudent';
 
         return Message::where('conversation_id', $conversationId)
