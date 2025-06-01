@@ -29,7 +29,7 @@ class ScheduleController extends Controller
         if (!Auth::user()->hasPermission('view-schedules')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $schedule->load('classroom', 'days');
+        $schedule->load('classroom', 'days.lessons');
         return response()->json([
             'data' => $schedule->toArray(),
             'status' => self::HTTP_OK,
