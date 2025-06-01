@@ -4,10 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Teacher extends Model
 {
+    protected $with = [
+        'user',
+        'subjects.classroom.students.parent.user',
+        'subjects.lessons.day.schedule.classroom',
+        'subjects.homeworks',
+        'subjects.events'
+    ];
+
     protected $table = 'teachers';
     protected $fillable = [
         'user_id',
@@ -19,9 +27,10 @@ class Teacher extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function subjects(): HasOne
+    // Fixed: Changed from hasOne to hasMany
+    public function subjects(): HasMany
     {
-        return $this->hasOne(Subject::class);
+        return $this->hasMany(Subject::class);
     }
 
     public function role(): string

@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Day extends Model
 {
+    protected $with = [
+        'schedule.classroom.students.parent.user',
+        'lessons.subject.teacher.user',
+        'lessons.attendances.student.parent.user'
+    ];
+
     protected $fillable = [
         'schedule_id',
         'day',

@@ -10,6 +10,15 @@ class Attendance extends Model
 {
     use HasFactory;
 
+    // Auto-load these relations whenever the model is retrieved
+    protected $with = [
+        'lesson.subject.teacher.user',
+        'lesson.subject.classroom.students.parent.user',
+        'lesson.day.schedule.classroom',
+        'student.parent.user',
+        'student.classroom'
+    ];
+
     protected $fillable = [
         'lesson_id',
         'student_id',

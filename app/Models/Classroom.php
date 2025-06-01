@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Classroom extends Model
 {
+    protected $with = [
+        'students.parent.user',
+        'schedule.days.lessons.subject.teacher.user',
+        'events.subject.teacher.user',
+        'subjects.teacher.user'
+    ];
+
     protected $fillable = [
         'name'
     ];
@@ -17,17 +24,18 @@ class Classroom extends Model
         return $this->hasMany(Student::class);
     }
 
-    public function schedule():HasOne {
+    public function schedule(): HasOne
+    {
         return $this->hasOne(Schedule::class);
     }
 
-    public function events(): HasMany {
+    public function events(): HasMany
+    {
         return $this->hasMany(Event::class);
     }
 
-    public function subjects(): HasMany {
+    public function subjects(): HasMany
+    {
         return $this->hasMany(Subject::class);
     }
-
-
 }

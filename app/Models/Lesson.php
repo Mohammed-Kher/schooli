@@ -11,6 +11,13 @@ class Lesson extends Model
 {
     use HasFactory;
 
+    protected $with = [
+        'day.schedule.classroom.students.parent.user',
+        'subject.teacher.user',
+        'subject.classroom',
+        'attendances.student.parent.user'
+    ];
+
     protected $fillable = [
         'day_id',
         'subject_id',

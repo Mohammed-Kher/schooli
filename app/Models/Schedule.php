@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Schedule extends Model
 {
+    protected $with = [
+        'classroom.students.parent.user',
+        'days.lessons.subject.teacher.user',
+        'days.lessons.attendances.student.parent.user'
+    ];
+
     protected $fillable = [
         'classroom_id'
     ];
@@ -16,6 +22,7 @@ class Schedule extends Model
     {
         return $this->belongsTo(Classroom::class);
     }
+
     public function days(): HasMany 
     {
         return $this->hasMany(Day::class);
