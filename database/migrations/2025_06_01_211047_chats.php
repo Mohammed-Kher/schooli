@@ -29,9 +29,9 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('conversation_id')->constrained('conversations')->onDelete('cascade');
-            $table->morphs('sender'); // sender_type (parent_students/teachers) and sender_id
+            $table->morphs('sender'); 
             $table->text('content');
-            $table->json('attachments')->nullable(); // For file attachments
+            // $table->json('attachments')->nullable(); // For file attachments
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
             
