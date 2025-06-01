@@ -56,11 +56,6 @@ class User extends Authenticatable
     }
     public function getPermissions() {
 
-        return $this->roles()->with('permissions')->get()->pluck('permissions','name','slug')->toArray();
-    }
-
-    public function getPermissions()
-    {
         return $this->roles()->with('permissions')->get()->pluck('permissions','slug')->toArray();
     }
 
