@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Validation\ValidationException;
@@ -29,7 +30,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user'  => $user,
+            'user'  => new UserResource($user),
             'token' => $token,
         ], 201);
     }
@@ -53,7 +54,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user'  => $user,
+            'user'  => new UserResource($user),
             'token' => $token,
         ]);
     }
@@ -61,7 +62,10 @@ class AuthController extends Controller
     // Get authenticated user
     public function user(Request $request)
     {
-        return response()->json($request->user());
+
+        return response()->json([
+            'user' => new UserResource($request->user()),
+        ]);
     }
 
     // Logout user (revoke tokens)

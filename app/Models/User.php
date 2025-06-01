@@ -54,6 +54,10 @@ class User extends Authenticatable
     {
         return $this->roles()->where('slug', $role)->exists();
     }
+    public function getPermissions() {
+
+        return $this->roles()->with('permissions')->get()->pluck('permissions','name','slug')->toArray();
+    }
 
     public function getPermissions()
     {
