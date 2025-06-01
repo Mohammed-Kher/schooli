@@ -7,12 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Homework extends Model
 {
-    protected $with = [
-        'subject.teacher.user',
-        'subject.classroom.students.parent.user',
-        'teacher.user'
-    ];
-
     protected $table = 'homeworks';
     protected $fillable = [
         'subject_id',

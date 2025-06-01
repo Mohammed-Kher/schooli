@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -12,14 +13,14 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $with = [
-        'roles.permissions',
-        'teacher.subjects.classroom',
-        'parent.students.classroom'
-    ];
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'email',
@@ -31,11 +32,21 @@ class User extends Authenticatable
         'image',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -56,9 +67,15 @@ class User extends Authenticatable
     }
     public function getPermissions() {
 
-        return $this->roles()->with('permissions')->get()->pluck('permissions','slug')->toArray();
+        return $this->roles()->with('permissions')->get()->pluck('permissions','name','slug')->toArray();
     }
 
+/**
+     * Check if the user has a specific permission.
+     *
+     * @param string $permissionSlug
+     * @return bool
+     */
     public function hasPermission(string $permissionSlug): bool
     {
         return DB::table('role_user')
@@ -76,6 +93,6 @@ class User extends Authenticatable
 
     public function parent(): HasOne
     {
-        return $this->hasOne(ParentStudent::class);
+        return $this->hasOne(Parent::class);
     }
 }

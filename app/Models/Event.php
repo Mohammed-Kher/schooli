@@ -7,13 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Event extends Model
 {
-    protected $with = [
-        'subject.teacher.user',
-        'subject.classroom.students.parent.user',
-        'classroom.students.parent.user',
-        'classroom.schedule.days.lessons'
-    ];
-
     protected $fillable = [
         'classroom_id',
         'subject_id',
@@ -29,8 +22,4 @@ class Event extends Model
         return $this->belongsTo(Subject::class);
     }
 
-    public function classroom(): BelongsTo
-    {
-        return $this->belongsTo(Classroom::class);
-    }
 }
