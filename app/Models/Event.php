@@ -22,4 +22,9 @@ class Event extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function classroom(): BelongsTo
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
 }
