@@ -65,8 +65,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'إدارة المعلمين', 'slug' => 'manage-teachers', 'description' => 'إنشاء وتحديث وحذف المعلمين'],
             ['name' => 'عرض الحضور', 'slug' => 'view-attendance', 'description' => 'عرض سجلات الحضور'],
             ['name' => 'إدارة الحضور', 'slug' => 'manage-attendance', 'description' => 'إنشاء وتحديث وحذف سجلات الحضور'],
-            ['name' => 'إدارة الآباء', 'slug' => 'manage-parent_students', 'description' => 'إدارة الآباء'],
-            ['name' => 'عرض الآباء', 'slug' => 'view-parent_students', 'description' => 'عرض الآباء'],
+
         ];
 
         foreach ($permissions as $permission) {
@@ -100,6 +99,7 @@ class RolePermissionSeeder extends Seeder
                 'view-days',
                 'view-events',
                 'create-events',
+                'manage-students',
                 'edit-events',
                 'delete-events',
                 'view-homework',
