@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Teacher;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends Controller
 {
@@ -27,10 +30,31 @@ class TeacherController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $validatedData = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-            'name' => ['required', 'string'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
-        $teacher = Teacher::create($validatedData);
+        $user = User::create([
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make(($validatedData['password'])),
+
+        ]);
+
+
+
+        $teacher = Teacher::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+        ]);
+
+        $role = DB::table('roles')->where('slug', 'teacher')->first();
+
+        DB::table('role_user')->insert([
+            'user_id' => $user->id,
+            'role_id' => $role->id,
+        ]);
+
         return response()->json([
             'data' => $teacher->toArray(),
             'status' => self::HTTP_OK,
