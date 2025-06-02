@@ -8,6 +8,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ParentStudentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -37,6 +38,8 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('auth/user', [AuthController::class, 'user']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::put('auth/update-profile/{user}', [ProfileController::class, 'update']);
+        Route::get('auth/profile/{user}', [ProfileController::class, 'show']);
     });
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('classrooms', ClassroomController::class);
