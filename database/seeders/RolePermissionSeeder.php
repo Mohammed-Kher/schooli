@@ -54,7 +54,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'عرض الدروس', 'slug' => 'view-lessons', 'description' => 'عرض جدول الدروس'],
             ['name' => 'إدارة الدروس', 'slug' => 'manage-lessons', 'description' => 'إنشاء وتحديث وحذف الدروس'],
             ['name' => 'عرض أولياء الأمور', 'slug' => 'view-parent_students', 'description' => 'عرض علاقات أولياء الأمور والطلاب'],
-            ['name' => 'إدارة أولياء الأمور', 'slug' => 'manage-parent_students', 'description' => 'إنشاء وتحديث وحذف علاقات أولياء الأمور'],
+            ['name' => 'إدارة أولياء الأمور', 'slug' => 'manage-parent-students', 'description' => 'إنشاء وتحديث وحذف علاقات أولياء الأمور'],
             ['name' => 'عرض الجداول', 'slug' => 'view-schedules', 'description' => 'عرض جداول الفصول'],
             ['name' => 'إدارة الجداول', 'slug' => 'manage-schedules', 'description' => 'إنشاء وتحديث وحذف الجداول'],
             ['name' => 'عرض الطلاب', 'slug' => 'view-students', 'description' => 'عرض معلومات الطلاب'],
@@ -113,7 +113,7 @@ class RolePermissionSeeder extends Seeder
                 'view-teachers',
                 'view-attendance',
                 'manage-attendance',
-                'manage-parent_students',
+                'manage-parent-students',
                 'view-parent_students',
             ],
             'student' => [

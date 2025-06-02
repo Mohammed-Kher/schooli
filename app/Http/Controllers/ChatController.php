@@ -57,23 +57,23 @@ class ChatController extends Controller
                     'subject' => $conversation->subject ? $conversation->subject->name : null,
                     'participant' => $userType === 'parent'
                         ? [
-                        'id' => $conversation->teacher->id,
-                        'name' => $conversation->teacher->name,
-                        // 'image' => $conversation->teacher->user->image,
-                        'type' => 'teacher'
-                    ]
+                            'id' => $conversation->teacher->id,
+                            'name' => $conversation->teacher->name,
+                            // 'image' => $conversation->teacher->user->image,
+                            'type' => 'teacher'
+                        ]
                         : [
-                        'id' => $conversation->parentStudent->id,
-                        'name' => $conversation->parentStudent->user->name,
-                        // 'image' => $conversation->parentStudent->user->image,
-                        'type' => 'parent'
-                    ],
+                            'id' => $conversation->parentStudent->id,
+                            'name' => $conversation->parentStudent->user->name,
+                            // 'image' => $conversation->parentStudent->user->image,
+                            'type' => 'parent'
+                        ],
                     'last_message' => $conversation->messages->first() ? [
                         'content' => $conversation->messages->first()->content,
                         'created_at' => $conversation->messages->first()->created_at,
                         'is_mine' => $this->isMessageMine($conversation->messages->first(), $userType)
                     ] : null,
-                    'unread_count' => $this->getUnreadCount($conversation->id, $userType),
+                    'unread_count' => $this->getUnreadCount(null, $conversation->id, $userType),
                     'last_message_at' => $conversation->last_message_at
                 ];
             })
@@ -107,9 +107,13 @@ class ChatController extends Controller
         if ($userType === $request->recipient_type) {
             return response()->json(['error' => 'Cannot start conversation with same user type'], 400);
         }
+        if ($request->recipient_type !== 'teacher' && $request->recipient_type !== 'parent') {
+            return response()->json(['error' => 'Recipient type must be either parent or teacher'], 400);
+        }
 
-        DB::beginTransaction();
+
         try {
+            DB::beginTransaction();
             // Get or create conversation
             if ($userType === 'parent') {
                 $parentStudent = ParentStudent::where('user_id', $user->id)->first();
@@ -120,7 +124,7 @@ class ChatController extends Controller
                 ], [
                     'title' => $request->title
                 ]);
-            } else {
+            } elseif ($userType === 'teacher') {
                 $teacher = Teacher::where('user_id', $user->id)->first();
                 $conversation = Conversation::firstOrCreate([
                     'parent_student_id' => $request->recipient_id,
@@ -143,7 +147,7 @@ class ChatController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['error' => 'Failed to create conversation'], 500);
+            return response()->json(['error' => "Failed to create conversation: {$e->getMessage()}"], 500);
         }
     }
 
@@ -372,12 +376,12 @@ class ChatController extends Controller
         }
     }
 
-    public function getUnreadCount(?Request $request,?int $conversationId, ?string $userType = null)
+    public function getUnreadCount(?Request $request = null, ?int $conversationId = 0, ?string $userType = null)
     {
-        if(!$userType) {
+        if (!$userType) {
             $userType = $this->getUserType(auth()->user());
         }
-        if(!$conversationId) {
+        if (!$conversationId) {
             $conversationId = $request->validate([
                 'conversation_id' => 'required|exists:conversations,id',
             ]);

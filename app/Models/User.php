@@ -66,8 +66,7 @@ class User extends Authenticatable
         return $this->roles()->where('slug', $role)->exists();
     }
     public function getPermissions() {
-
-        return $this->roles()->with('permissions')->get()->pluck('permissions','name','slug')->toArray();
+        return $this->roles()->with('permissions')->get()->pluck('permissions', 'slug')->toArray();
     }
 
 /**
@@ -93,6 +92,6 @@ class User extends Authenticatable
 
     public function parent(): HasOne
     {
-        return $this->hasOne(Parent::class);
+        return $this->hasOne(Parent::class, 'user_id');
     }
 }

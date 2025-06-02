@@ -26,7 +26,7 @@ class ParentStudentController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('manage-parent_students')) {
+        if (!Auth::user()->hasPermission('manage-parent-students')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -38,7 +38,7 @@ class ParentStudentController extends Controller
         $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
-            'password' => Hash::make(($validatedData['password'])),
+            'password' => Hash::make($validatedData['password']),
         ]);
 
         $role = DB::table('roles')->where('slug', 'parent')->first();
@@ -70,51 +70,43 @@ class ParentStudentController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, ParentStudent $parent)
     {
-
-        // dd($parentStudent);
-        if (!Auth::user()->hasPermission('manage-parent_students')) {
+        if (!Auth::user()->hasPermission('manage-parent-students')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        // if(!$parentStudent) {
-        //     return response()->json(['error' => 'ParentStudent not found'], 404);
-        // }
-        // if(!$parentStudent->user) {
-        //     return response()->json(['error' => 'User not found for this ParentStudent'], 404);
-        // }
+        if(!$parent) {
+            return response()->json(['error' => 'ParentStudent not found'], 404);
+        }
+        $user = User::find($parent->user_id);
+        if(!$user) {
+            return response()->json(['error' => 'User not found for this ParentStudent'], 404);
+        }
 
         $validatedData = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
-        $user = User::find($id);
+        $user = $parent->user;
         // dd($user);
-
-        if ($request->input('password')) {
-            $user->update([
-                'name' => $validatedData['name'] ?? $user->name,
-                'email' => $validatedData['email'] ?? $user->email,
-                'password' => Hash::make($validatedData['password']) ?? $user->password,
-            ]);
-        } else {
-            $user->update([
-                'name' => $validatedData['name'] ?? $user->name,
-                'email' => $validatedData['email'] ?? $user->email,
-            ]);
-        }
-        // dd($user);
+        
+        $is_updated = $user->update([
+            'name' => $validatedData['name'] ?? $user->name,
+            'email' => $validatedData['email'] ?? $user->email,
+            'password' => $request->has('password') ? Hash::make($validatedData['password']) : $user->password,
+        ]);
+        
         return response()->json([
-            'data' => $user,
-            'status' => self::HTTP_OK,
+            'data' => $user->toArray(),
+            'status' => $is_updated ? self::HTTP_OK : self::NOT_FOUND,
             'message' => self::UPDATED,
         ]);
     }
 
     public function destroy(ParentStudent $parentStudent)
     {
-        if (!Auth::user()->hasPermission('manage-parent_students')) {
+        if (!Auth::user()->hasPermission('manage-parent-students')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $parentStudent->delete();

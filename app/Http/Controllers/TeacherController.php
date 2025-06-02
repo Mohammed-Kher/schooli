@@ -40,9 +40,13 @@ class TeacherController extends Controller
             'password' => Hash::make(($validatedData['password'])),
 
         ]);
+        $role = DB::table('roles')->where('slug', 'teacher')->first();
 
-
-
+        DB::table('role_user')->insert([
+            'user_id' => $user->id,
+            'role_id' => $role->id,
+        ]);
+        
         $teacher = Teacher::create([
             'user_id' => $user->id,
             'name' => $user->name,
@@ -77,17 +81,34 @@ class TeacherController extends Controller
 
     public function update(Request $request, Teacher $teacher)
     {
-        if (!Auth::user()->hasPermission('manage-teachers')) {
+        if (!Auth::user()->hasPermission('manage-parent-students')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+        if(!$teacher) {
+            return response()->json(['error' => 'ParentStudent not found'], 404);
+        }
+        $user = User::find($teacher->user_id);
+        if(!$user) {
+            return response()->json(['error' => 'User not found for this Teacher'], 404);
+        }
+
         $validatedData = $request->validate([
-            'user_id' => ['sometimes', 'exists:users,id'],
-            'name' => ['sometimes', 'string'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['nullable', 'string', 'min:8'],
         ]);
-        $teacher->update($validatedData);
+        $user = $teacher->user;
+        // dd($user);
+        
+        $is_updated = $user->update([
+            'name' => $validatedData['name'] ?? $user->name,
+            'email' => $validatedData['email'] ?? $user->email,
+            'password' => $request->has('password') ? Hash::make($validatedData['password']) : $user->password,
+        ]);
+        
         return response()->json([
-            'data' => $teacher->toArray(),
-            'status' => self::HTTP_OK,
+            'data' => $user->toArray(),
+            'status' => $is_updated ? self::HTTP_OK : self::NOT_FOUND,
             'message' => self::UPDATED,
         ]);
     }

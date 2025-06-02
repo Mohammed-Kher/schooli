@@ -21,9 +21,6 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->timestamp('last_message_at')->nullable();
             $table->timestamps();
-            
-            // Ensure unique conversation between parent and teacher for each subject
-            $table->unique(['parent_student_id', 'teacher_id', 'subject_id']);
         });
 
         Schema::create('messages', function (Blueprint $table) {
