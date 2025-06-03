@@ -130,6 +130,7 @@ class RolePermissionSeeder extends Seeder
             'parent' => [
                 'view-classrooms',
                 'view-days',
+                'view-teachers',
                 'view-events',
                 'view-homework',
                 'view-lessons',
