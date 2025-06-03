@@ -30,7 +30,6 @@ class ChatController extends Controller
         $conversations = Conversation::with([
             'parentStudent.user:id,name',
             'teacher.user:id,name',
-            'subject:id,name',
             'messages' => function ($query) {
                 $query->latest()->limit(1);
             }
@@ -54,7 +53,6 @@ class ChatController extends Controller
                 return [
                     'id' => $conversation->id,
                     'title' => $conversation->title,
-                    'subject' => $conversation->subject ? $conversation->subject->name : null,
                     'participant' => $userType === 'parent'
                         ? [
                             'id' => $conversation->teacher->id,
@@ -88,7 +86,6 @@ class ChatController extends Controller
         $validator = Validator::make($request->all(), [
             'recipient_id' => 'required|integer',
             'recipient_type' => 'required|in:parent,teacher',
-            'subject_id' => 'nullable|exists:subjects,id',
             'title' => 'nullable|string|max:255'
         ]);
 
@@ -120,7 +117,6 @@ class ChatController extends Controller
                 $conversation = Conversation::firstOrCreate([
                     'parent_student_id' => $parentStudent->id,
                     'teacher_id' => $request->recipient_id,
-                    'subject_id' => $request->subject_id
                 ], [
                     'title' => $request->title
                 ]);
@@ -129,7 +125,6 @@ class ChatController extends Controller
                 $conversation = Conversation::firstOrCreate([
                     'parent_student_id' => $request->recipient_id,
                     'teacher_id' => $teacher->id,
-                    'subject_id' => $request->subject_id
                 ], [
                     'title' => $request->title
                 ]);
@@ -172,22 +167,24 @@ class ChatController extends Controller
         $page = $request->get('page', 1);
         $perPage = $request->get('per_page', 50);
 
-        $messages = Message::with('sender')
+        $messages = Message::with(['sender', 'sender.user:id,name'])
             ->where('conversation_id', $conversationId)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->orderBy('created_at', 'desc')->get();
+
+
+        // ->paginate($perPage, ['*'], 'page', $page);
 
         // Mark messages as read
         $this->markMessagesAsRead($conversationId, $userType, $user);
 
         return response()->json([
-            'messages' => $messages->items(),
-            'pagination' => [
-                    'current_page' => $messages->currentPage(),
-                    'total_pages' => $messages->lastPage(),
-                    'total' => $messages->total(),
-                    'per_page' => $messages->perPage()
-                ]
+            'messages' => $messages,
+            // 'pagination' => [
+            //         'current_page' => $messages->currentPage(),
+            //         'total_pages' => $messages->lastPage(),
+            //         'total' => $messages->total(),
+            //         'per_page' => $messages->perPage()
+            //     ]
         ]);
     }
 
@@ -262,9 +259,9 @@ class ChatController extends Controller
                     // 'attachments' => $message->attachments,
                     'created_at' => $message->created_at,
                     'sender' => [
-                            'name' => $user->name,
-                            'type' => $userType
-                        ]
+                        'name' => $user->name,
+                        'type' => $userType
+                    ]
                 ]
             ], 201);
 
@@ -314,8 +311,6 @@ class ChatController extends Controller
             return response()->json(['error' => 'Message not found'], 404);
         }
 
-        // Check if user owns this message
-        $isOwner = false;
         if ($userType === 'parent') {
             $parentStudent = ParentStudent::where('user_id', $user->id)->first();
             $isOwner = $message->sender_type === 'App\Models\ParentStudent' &&
@@ -388,10 +383,35 @@ class ChatController extends Controller
         }
         $senderType = $userType === 'parent' ? 'App\Models\Teacher' : 'App\Models\ParentStudent';
 
-        return Message::where('conversation_id', $conversationId)
+        $unread = Message::where('conversation_id', $conversationId)
             ->where('sender_type', $senderType)
             ->whereNull('read_at')
             ->count();
+            return $unread;
+    }
+
+    public function UnreadCount(?Request $request = null, ?int $conversationId = 0, ?string $userType = null)
+    {
+        if (!$userType) {
+            $userType = $this->getUserType(auth()->user());
+        }
+        if (!$conversationId) {
+            $conversationId = $request->validate([
+                'conversation_id' => 'required|exists:conversations,id',
+            ]);
+        }
+        $senderType = $userType === 'parent' ? 'App\Models\Teacher' : 'App\Models\ParentStudent';
+
+        $unread = Message::where('conversation_id', $conversationId)
+            ->where('sender_type', $senderType)
+            ->whereNull('read_at')
+            ->count();
+            return response()->json([
+                'data' => $unread,
+                'status' => self::HTTP_OK,
+                'message' => self::RETRIEVED
+            ]
+            );
     }
 
     private function markMessagesAsRead($conversationId, $userType, $user)

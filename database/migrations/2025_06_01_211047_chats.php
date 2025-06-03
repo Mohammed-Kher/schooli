@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('parent_student_id')->constrained('parent_students')->onDelete('cascade');
             $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
-            $table->foreignId('subject_id')->nullable()->constrained('subjects')->onDelete('set null');
             $table->string('title')->nullable();
             $table->timestamp('last_message_at')->nullable();
             $table->timestamps();

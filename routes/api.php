@@ -75,7 +75,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
 
             // Get total unread messages count
-            Route::get('/unread-count/{conversationId}', [ChatController::class, 'getUnreadCount']);
+            Route::get('/unread-count/{conversationId}', [ChatController::class, 'UnreadCount']);
 
         });
     });

@@ -12,7 +12,6 @@ class Conversation extends Model
     protected $fillable = [
         'parent_student_id',
         'teacher_id',
-        'subject_id',
         'title',
         'last_message_at'
     ];
@@ -29,11 +28,6 @@ class Conversation extends Model
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);
-    }
-
-    public function subject()
-    {
-        return $this->belongsTo(Subject::class);
     }
 
     public function messages()
