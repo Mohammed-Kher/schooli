@@ -10,7 +10,14 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create Roles
+        $this->createRoles();
+        $this->createPermissions();
+        $this->assignPermissionsToRoles();
+        $this->assignRolesToUsers();
+    }
+    
+    private function createRoles()
+    {
         $roles = [
             ['name' => 'المدير', 'slug' => 'admin', 'description' => 'مدير النظام'],
             ['name' => 'المعلم', 'slug' => 'teacher', 'description' => 'معلم المدرسة'],
@@ -23,10 +30,14 @@ class RolePermissionSeeder extends Seeder
                 'name' => $role['name'],
                 'slug' => $role['slug'],
                 'description' => $role['description'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
-
-        // 2. Create Permissions
+    }
+    
+    private function createPermissions()
+    {
         $permissions = [
             ['name' => 'عرض الفصول', 'slug' => 'view-classrooms', 'description' => 'عرض معلومات الفصول'],
             ['name' => 'إدارة الفصول', 'slug' => 'manage-classrooms', 'description' => 'إنشاء وتحديث وحذف الفصول'],
@@ -43,7 +54,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'عرض الدروس', 'slug' => 'view-lessons', 'description' => 'عرض جدول الدروس'],
             ['name' => 'إدارة الدروس', 'slug' => 'manage-lessons', 'description' => 'إنشاء وتحديث وحذف الدروس'],
             ['name' => 'عرض أولياء الأمور', 'slug' => 'view-parent_students', 'description' => 'عرض علاقات أولياء الأمور والطلاب'],
-            ['name' => 'إدارة أولياء الأمور', 'slug' => 'manage-parent_students', 'description' => 'إنشاء وتحديث وحذف علاقات أولياء الأمور'],
+            ['name' => 'إدارة أولياء الأمور', 'slug' => 'manage-parent-students', 'description' => 'إنشاء وتحديث وحذف علاقات أولياء الأمور'],
             ['name' => 'عرض الجداول', 'slug' => 'view-schedules', 'description' => 'عرض جداول الفصول'],
             ['name' => 'إدارة الجداول', 'slug' => 'manage-schedules', 'description' => 'إنشاء وتحديث وحذف الجداول'],
             ['name' => 'عرض الطلاب', 'slug' => 'view-students', 'description' => 'عرض معلومات الطلاب'],
@@ -54,6 +65,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'إدارة المعلمين', 'slug' => 'manage-teachers', 'description' => 'إنشاء وتحديث وحذف المعلمين'],
             ['name' => 'عرض الحضور', 'slug' => 'view-attendance', 'description' => 'عرض سجلات الحضور'],
             ['name' => 'إدارة الحضور', 'slug' => 'manage-attendance', 'description' => 'إنشاء وتحديث وحذف سجلات الحضور'],
+
         ];
 
         foreach ($permissions as $permission) {
@@ -61,25 +73,33 @@ class RolePermissionSeeder extends Seeder
                 'name' => $permission['name'],
                 'slug' => $permission['slug'],
                 'description' => $permission['description'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
-
-        // 3. Assign Permissions to Roles
-        $adminRoleId = DB::table('roles')->where('slug', 'admin')->first()->id;
+    }
+    
+    private function assignPermissionsToRoles()
+    {
+        // Assign all permissions to admin
+        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
         $allPermissionIds = DB::table('permissions')->pluck('id')->toArray();
+        
         foreach ($allPermissionIds as $permissionId) {
             DB::table('permission_role')->insert([
-                'role_id' => $adminRoleId,
+                'role_id' => $adminRole->id,
                 'permission_id' => $permissionId,
             ]);
         }
 
+        // Assign specific permissions to other roles
         $rolePermissions = [
             'teacher' => [
                 'view-classrooms',
                 'view-days',
                 'view-events',
                 'create-events',
+                'manage-students',
                 'edit-events',
                 'delete-events',
                 'view-homework',
@@ -93,6 +113,8 @@ class RolePermissionSeeder extends Seeder
                 'view-teachers',
                 'view-attendance',
                 'manage-attendance',
+                'manage-parent-students',
+                'view-parent_students',
             ],
             'student' => [
                 'view-classrooms',
@@ -108,6 +130,7 @@ class RolePermissionSeeder extends Seeder
             'parent' => [
                 'view-classrooms',
                 'view-days',
+                'view-teachers',
                 'view-events',
                 'view-homework',
                 'view-lessons',
@@ -119,17 +142,21 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($rolePermissions as $roleSlug => $permissionSlugs) {
-            $roleId = DB::table('roles')->where('slug', $roleSlug)->first()->id;
+            $role = DB::table('roles')->where('slug', $roleSlug)->first();
+            
             foreach ($permissionSlugs as $permissionSlug) {
-                $permissionId = DB::table('permissions')->where('slug', $permissionSlug)->first()->id;
+                $permission = DB::table('permissions')->where('slug', $permissionSlug)->first();
+                
                 DB::table('permission_role')->insert([
-                    'role_id' => $roleId,
-                    'permission_id' => $permissionId,
+                    'role_id' => $role->id,
+                    'permission_id' => $permission->id,
                 ]);
             }
         }
-
-        // 4. Assign Roles to Users (Assuming Users from DatabaseSeeder)
+    }
+    
+    private function assignRolesToUsers()
+    {
         $userRoles = [
             ['email' => 'admin@school.com', 'role_slug' => 'admin'],
             ['email' => 'ahmed.teacher@school.com', 'role_slug' => 'teacher'],
@@ -141,6 +168,7 @@ class RolePermissionSeeder extends Seeder
             ['email' => 'yusuf.student@school.com', 'role_slug' => 'student'],
             ['email' => 'laila.student@school.com', 'role_slug' => 'student'],
             ['email' => 'ali.student@school.com', 'role_slug' => 'student'],
+            ['email' => 'test@example.com', 'role_slug' => 'admin'],
         ];
 
         foreach ($userRoles as $userRole) {

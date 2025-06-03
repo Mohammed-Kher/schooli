@@ -158,6 +158,8 @@ class DataSeeder extends Seeder
         $classrooms = [
             ['name' => 'الصف الأول'],
             ['name' => 'الصف الثاني'],
+            ['name' => 'الصف الثالث'],
+            ['name' => 'الصف الرابع'],
         ];
 
         foreach ($classrooms as $classroomData) {

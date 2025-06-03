@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\DayController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ParentStudentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -36,6 +38,8 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('auth/user', [AuthController::class, 'user']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::put('auth/update-profile/{user}', [ProfileController::class, 'update']);
+        Route::get('auth/profile/{user}', [ProfileController::class, 'show']);
     });
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('classrooms', ClassroomController::class);
@@ -49,5 +53,30 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('students', StudentController::class);
         Route::apiResource('subjects', SubjectController::class);
         Route::apiResource('teachers', TeacherController::class);
+        // Chat Routes
+        Route::prefix('chat')->group(function () {
+
+            // Get all conversations for authenticated user
+            Route::get('/conversations', [ChatController::class, 'getConversations']);
+
+            // Start a new conversation
+            Route::post('/conversations', [ChatController::class, 'startConversation']);
+
+            // Get messages for a specific conversation
+            Route::get('/conversations/{conversationId}/messages', [ChatController::class, 'getMessages']);
+
+            // Send a message in a conversation
+            Route::post('/conversations/{conversationId}/messages', [ChatController::class, 'sendMessage']);
+
+            // Mark messages as read in a conversation
+            Route::patch('/conversations/{conversationId}/read', [ChatController::class, 'markAsRead']);
+
+            // Delete a specific message
+            Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
+
+            // Get total unread messages count
+            Route::get('/unread-count/{conversationId}', [ChatController::class, 'UnreadCount']);
+
+        });
     });
 });
