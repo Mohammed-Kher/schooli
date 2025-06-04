@@ -38,8 +38,8 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('auth/user', [AuthController::class, 'user']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
-        Route::put('auth/update-profile/{user}', [ProfileController::class, 'update']);
-        Route::get('auth/profile/{user}', [ProfileController::class, 'show']);
+        Route::put('auth/update-profile/{id}', [ProfileController::class, 'update']);
+        Route::get('auth/profile', [ProfileController::class, 'show']);
     });
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('classrooms', ClassroomController::class);
